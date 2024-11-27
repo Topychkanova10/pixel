@@ -1,0 +1,14 @@
+:root {
+    --current-color: rgb(255,102,46); /*цвет поумолчанию*/
+    --default-color: rgb(62,62,62); /*основной цвет */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    -webkit-user-drag: none;
+    user-select: none;
+    background: black;
+}
