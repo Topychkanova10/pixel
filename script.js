@@ -54,3 +54,97 @@ else {
         field.appendChild(cell) //Добавляем клетку в поле
     }
 }
+
+//Добавляем обработчика событий для клеток
+let cells = document.querySelectorAll('.cell')//получаем все клетки из DOM
+cells.forEach(cell => {
+    cell.addEventListener('mouseover', () => {
+        // Если кнопка мыши нажата,закрашиваем клетку
+        if (IS_CLICKED) {
+            anime({ //Анимация закрашивания
+                targets: cell, //целевая клетка
+                background: CURRENT_COLOR, //устанавливаем цвет из current_color
+                easing: 'easeInOutQuad', //плавное ускорение
+                duration: 500, //длительность анимации
+                delay: anime.stagger(50, {grid: [30, 15], from: cell_id}), //задержка анимации
+            })
+            cells.forEach(c => c.dataset.color = CURRENT_COLORCODE)//ОБНОВЛЯЕМ КОД ЦВЕТА ДЛЯ ВСЕХ КЛЕТОК    
+        } else{
+            //Если режим заливки не активен, закрашиваемтолько текущую клетку
+            anime({
+                targets: '.cell', //все клетки
+                background: CURRENT_COLOR, //устанавливаем цвет из current_color
+                easing: 'easeInOutQuad', //плавное ускорение
+                duration: 500, //длительность анимации
+            })
+            cell.dataset.color = CURRENT_COLORCODE //оБНОВЛЯЕМ КОД ЦВЕТА КЛЕТКИ
+        }
+    })
+    // При нажатии на кнопку мыши
+    cell.addEventListener('mousedown', () => {
+        if (FILL_MODE) {
+            //Если активен режим заливки
+            let cell_id = parseInt(cell.getAttribute('id'))//получаем ID клетки
+            FILL_MODE = !FILL_MODE//Деактивируем режим заливки
+            anime({//Анимация заливки
+                targets: '.cell', //все клетки
+                background: CURRENT_COLOR, //устанавливаем цвет из current_color
+                duration: 200, //длительность анимации
+                easing: 'linear' //линейное ускорение
+            })
+        }
+    })
+})
+// ОБРАБОТЧИК ВЫБОРА ЦВЕТА
+let color_cells = document.querySelectorAll('.color-cell') //получаем элементы цветовой палитры
+color_cells.forEach(color_cell  => {
+    color_cell.addEventListener('click', () => {
+        FILL_MODE = false //деактивируем режим заливки
+        CURRENT_COLOR = getComputedStyle(color_cell).backgroundColor //Устанавливеам цвет из выбранной ячейки
+        CURRENT_COLORCODE = color_cell.dataset.colorcode //Коц цвета из data-фтрибута
+        document.documentElement.style.cssText = `--current-color: ${CURRENT_COLOR}`//оБНОВЛЯЕМ CSS ПЕРЕМЕННУЮ
+        document.querySelector('.selected').classList.remove('selected')//Убираем выделение с предыдущей ячейки
+        color_cell.classList.add('selected')//Добавляем выделение на текущую ячейку
+
+    })
+})
+
+//Обработчик для ластика
+document.querySelector('.eraser').addEventListener('click', () => {
+    CURRENT_COLOR = DEFAULT_COLOR //Устанавливеам цвет ПО УМОЛЧаНИЮ
+    CURRENT_COLORCODE = "0" //Код цвета для ластика
+    document.documentElement.style.cssText = `--current-color: ${CURRENT_COLOR}`//оБНОВЛЯЕМ CSS ПЕРЕМЕННУЮ
+    document.querySelector('.selected').classList.remove('selected')//Убираем выделение с предыдущей ячейки
+    color_cell.classList.add('selected')//Добавляем выделение на текущую ячейку
+    this.classList.add('selected') //Выделяем инструмент ластика
+})
+
+// Обработчик для инструмента заливки
+document.querySelector('.fill-tool').addEventListener('click', () => {
+    FILL_BODE = !FILL_MODE //пЕРЕКЛЮЧАЕМ  режим заливки
+    document.qerySelector('.selected').classList.remove('selected') //Убираем выделение с других инструментов
+    this.classList.add('selected') //Выделяем инструмент заливки
+})
+//Сохраняем состояния поля в cookie каждую минуту
+setInterval(() => {
+    let result = ''//Строка для хранения результата
+    let temp_cells = document.querySelectorAll('.cell') //Получаем все клетки
+    temp_cells.forEach(cell => result += `${sell.dataset.color}`)//дОБАВЛЯЕМ КОД ЦВЕТА КАЖДОЙ ЯЧЕЙКИ
+    document.cookie = `pixel-result=${result};max-age=100000`//Сохраняем в cookie
+    console.log(document.cookie) //Логиурем для проверки
+}, 60000)
+
+// Обработчик для сохранения поля в изображение
+document.querySelector('.save-tool').addEventListener('click', () => {
+    domtoimage.toJpeg(field, {quality: 2}) // Генерируем изображение поля
+    .then((dataUrl) => {
+        let link = document.createElement('a') // Создаём ссылку для скачивания
+        link.download = 'pixel.jpg' // Имя файла
+        link.href = dataUrl // Устанавливаем URL изображения
+        link.click() // Инициируем скачивание
+    }).catch((error) => console.error('oops, something went wrong!', error)) // Обрабатываем ошибку
+})
+
+
+
+
